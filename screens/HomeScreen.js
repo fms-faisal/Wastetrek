@@ -1,45 +1,76 @@
-// screens/HomeScreen.js
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
+import { Button, Image, View, Text } from 'react-native';
+import { useState, useEffect } from 'react';
 
-const HomeScreen = ({ navigation }) => {
+export default function HomeScreen() {
+  const [image, setImage] = useState(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+
+  useEffect(() => {
+    // Request permission when the component mounts
+    const getPermissions = async () => {
+      const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+      setPermissionGranted(granted);
+      if (!granted) {
+        alert('Permission to access camera is required!');
+      }
+    };
+    getPermissions();
+  }, []);
+
+  const pickImageFromGallery = async () => {
+    if (!permissionGranted) {
+      alert('Camera permission not granted!');
+      return;
+    }
+
+    // Launch the image picker for selecting images from the gallery
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    } else {
+      alert('Image selection was canceled.');
+    }
+  };
+
+  const takePhoto = async () => {
+    if (!permissionGranted) {
+      alert('Camera permission not granted!');
+      return;
+    }
+
+    // Launch the camera
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    } else {
+      alert('Image capture was canceled.');
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <Text style={styles.title}>TrashTracker</Text>
-        <Ionicons name="notifications-outline" size={24} color="black" />
-      </View>
-      <View style={styles.cameraContainer}>
-        <Button title="Take Photo" onPress={() => console.log("Camera Opened")} />
-        <Button title="Upload from Gallery" onPress={() => console.log("Gallery Opened")} />
-      </View>
-      {/* AI Progress bar, Trash Volume will go here after image is uploaded */}
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      {permissionGranted ? (
+        <>
+          <Button title="Take a photo" onPress={takePhoto} />
+          <Button title="Upload from Gallery" onPress={pickImageFromGallery} />
+          {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+        </>
+      ) : (
+        <Text>Camera permission is required to use this feature.</Text>
+      )}
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  cameraContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-});
-
-export default HomeScreen;
+}

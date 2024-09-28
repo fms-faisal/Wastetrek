@@ -9,10 +9,10 @@ const HeatmapScreen = () => {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+            latitude: 23.8103,  // Latitude of Dhaka
+            longitude: 90.4125, // Longitude of Dhaka
+            latitudeDelta: 0.0922,  // Zoom level for latitude
+            longitudeDelta: 0.0421,  // Zoom level for longitude
         }}
       >
         {/* Add Heatmap points based on trash data */}
